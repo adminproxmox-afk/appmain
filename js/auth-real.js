@@ -581,10 +581,6 @@
       gender: prefill.gender || ''
     });
     if (!result?.ok) {
-      if (result.code === 'SOCIAL_REQUIRES_LOCAL_ACCOUNT') {
-        showProviderFeedback(window.AuthUX?.t?.('social_requires_local_account') || text('noIdentity'), 'warning');
-        return;
-      }
       showProviderFeedback(unavailableMessage, 'error');
       return;
     }

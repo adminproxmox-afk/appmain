@@ -1,7 +1,7 @@
 const registerI18n = {
   uk: {
     title: 'Створити акаунт',
-    subtitle: 'Створіть акаунт вручну, а потім зможете входити через Google або Telegram.',
+    subtitle: 'Використайте Google або Telegram для швидкої реєстрації та входу.',
     username: 'Логін',
     tag: 'Тег профілю',
     email: 'Пошта',

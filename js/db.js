@@ -559,7 +559,7 @@
   function migrateLegacy(db) {
     const legacyUsers = safeParse(localStorage.getItem('users'));
     if (Array.isArray(legacyUsers) && legacyUsers.length) {
-      db.users = legacyUsers.map((user) => mergeDefaults(createUserRecord(user), user));
+      db.users = legacyUsers.map((user) => mergeDefaults(createUserRecord(user, db), user));
     }
 
     const sessionUser = localStorage.getItem('user');
@@ -652,7 +652,7 @@
       ));
 
     db.users = db.users.map((user) => {
-      const normalizedUser = mergeDefaults(createUserRecord(user), user);
+      const normalizedUser = mergeDefaults(createUserRecord(user, db), user);
       normalizedUser.login = String(normalizedUser.login || '').trim();
       normalizedUser.email = String(normalizedUser.email || '').trim().toLowerCase();
       normalizedUser.password = String(normalizedUser.password || '');
@@ -727,9 +727,11 @@
     mirrorLegacy(cache);
   }
 
-  function createUserRecord(input) {
-    const login = String(input.login || '').trim();
+  function createUserRecord(input, db = null) {
     const email = String(input.email || '').trim().toLowerCase();
+    const providedLogin = String(input.login || '').trim();
+    const fallbackBase = String(providedLogin || email.split('@')[0] || input.displayName || input.name || '').trim() || 'player';
+    const login = String(providedLogin || createUniqueLogin(db || { users: [] }, fallbackBase)).trim();
     const password = String(input.password || '');
     const authProvider = normalizeProvider(input.authProvider || (password ? 'local' : ''));
     const authProviders = unique(
@@ -904,7 +906,7 @@
         username: tagCheck.normalizedTag,
         authProvider: 'local',
         authProviders: ['local']
-      });
+      }, db);
       db.users.push(user);
       if (input.autoLogin) {
         user.lastLoginAt = new Date().toISOString();
@@ -951,6 +953,8 @@
       const normalizedEmail = String(input.email || '').trim().toLowerCase();
       const displayName = String(input.displayName || input.name || '').trim();
       const providerUserId = String(input.providerUserId || '').trim();
+      const usernameInput = String(input.username || '').trim();
+      const incomingGender = normalizeGender(input.gender);
       const db = load();
       let user = null;
       let linked = false;
@@ -960,24 +964,45 @@
         user = db.users.find((entry) => String(entry.authIdentities?.[normalizedProvider] || '') === providerUserId);
       }
 
-      if (normalizedEmail) {
-        user = user || db.users.find((entry) => (
-          getUserAuthProviders(entry).includes(normalizedProvider)
-          && String(entry.email || '').toLowerCase() === normalizedEmail
-        ));
-        if (!user) {
-          user = db.users.find((entry) => String(entry.email || '').toLowerCase() === normalizedEmail);
-        }
+      if (!user && normalizedEmail) {
+        user = db.users.find((entry) => String(entry.email || '').toLowerCase() === normalizedEmail);
       }
 
       if (!user) {
-        return { ok: false, code: 'SOCIAL_REQUIRES_LOCAL_ACCOUNT' };
+        const loginBase = normalizedEmail || displayName || `${normalizedProvider}_user`;
+        const login = createUniqueLogin(db, loginBase);
+        const sanitizedUsername = validatePublicTagValue(usernameInput)
+          ? normalizePublicTag(usernameInput)
+          : '';
+        const userRecord = createUserRecord({
+          login,
+          email: normalizedEmail,
+          displayName,
+          username: sanitizedUsername,
+          gender: incomingGender,
+          authProvider: normalizedProvider,
+          authProviders: [normalizedProvider],
+          authIdentities: providerUserId ? { [normalizedProvider]: providerUserId } : {},
+          password: ''
+        }, db);
+
+        userRecord.authProvider = normalizedProvider;
+        userRecord.authProviders = unique([...(Array.isArray(userRecord.authProviders) ? userRecord.authProviders : []), normalizedProvider]);
+        userRecord.authIdentities = {
+          ...(userRecord.authIdentities || {}),
+          ...(providerUserId ? { [normalizedProvider]: providerUserId } : {})
+        };
+        userRecord.updatedAt = new Date().toISOString();
+        userRecord.lastLoginAt = userRecord.updatedAt;
+
+        db.users.push(userRecord);
+        user = userRecord;
+        isNew = true;
       } else {
-        const incomingGender = normalizeGender(input.gender);
         const currentProviders = getUserAuthProviders(user);
         linked = !currentProviders.includes(normalizedProvider);
         user.authProviders = linked ? unique([...currentProviders, normalizedProvider]) : currentProviders;
-        user.authIdentities = (user.authIdentities && typeof user.authIdentities === 'object') ? user.authIdentities : {};
+        user.authIdentities = (user.authIdentities && typeof user.authIdentities === 'object') ? { ...user.authIdentities } : {};
         if (providerUserId) {
           user.authIdentities[normalizedProvider] = providerUserId;
         }
@@ -992,8 +1017,8 @@
         if (normalizedEmail) {
           user.profile.email = normalizedEmail;
         }
-        if (input.username) {
-          const tagCheck = checkPublicTagAvailability(db, input.username, user.login);
+        if (usernameInput) {
+          const tagCheck = checkPublicTagAvailability(db, usernameInput, user.login);
           if (!tagCheck.ok) {
             return { ok: false, code: tagCheck.code, tag: tagCheck.normalizedTag, similarTag: tagCheck.similarTag };
           }
