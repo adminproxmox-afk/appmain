@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="About the current web version of Life Capital Academy.">
+  <title>Про додаток | Life Capital Academy</title>
+  <script>
+    (() => {
+      try {
+        const rawDb = localStorage.getItem('miniAppDb');
+        const db = rawDb ? JSON.parse(rawDb) : null;
+        const darkMode = typeof db?.settings?.darkMode === 'boolean'
+          ? db.settings.darkMode
+          : localStorage.getItem('darkMode') !== 'false';
+        const theme = darkMode ? 'dark' : 'light';
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+        const style = document.createElement('style');
+        style.textContent = darkMode
+          ? 'html[data-theme="dark"] body{background:#09111d;color:#eff4ff}'
+          : 'html[data-theme="light"] body{background:#dfe6ea;color:#142436}';
+        document.head.appendChild(style);
+      } catch (error) {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css">
+  <link rel="stylesheet" href="style/ui-preferences.css">
+  <link rel="stylesheet" href="style/about.css">
+  <link rel="stylesheet" href="style/enhancements.css">
+</head>
+<body class="about-page">
+  <main class="about-shell">
+    <header class="about-header">
+      <a class="about-link about-link--ghost" id="aboutBackLink" href="login.html">
+        <span class="about-link__icon">←</span>
+        <span id="aboutBackLabel">До входу</span>
+      </a>
+
+      <div class="about-header__actions">
+        <a class="about-link about-link--muted" href="privacy.html" id="aboutPrivacyLink">Політика</a>
+        <a class="about-link about-link--muted" href="terms.html" id="aboutTermsLink">Умови</a>
+        <a class="about-link" id="aboutAppLink" href="login.html">Увійти</a>
+      </div>
+    </header>
+
+    <section class="about-hero">
+      <p class="about-kicker" id="aboutKicker">Life Capital Academy</p>
+      <h1 class="about-title" id="aboutTitle">Про додаток</h1>
+      <p class="about-lead" id="aboutLead">
+        Life Capital Academy це навчальний застосунок, клієнтська частина якого використовує
+        спільну фронтенд-основу з сайтом для єдиного інтерфейсу, профілю, прогресу та мініігор.
+      </p>
+
+      <div class="about-metrics">
+        <div class="about-metric">
+          <span class="about-metric__label" id="aboutMetricOneLabel">Формат</span>
+          <strong class="about-metric__value" id="aboutMetricOneValue">Застосунок зі спільним фронтендом на базі сайту</strong>
+        </div>
+        <div class="about-metric">
+          <span class="about-metric__label" id="aboutMetricTwoLabel">Навчання</span>
+          <strong class="about-metric__value" id="aboutMetricTwoValue">Мініігри, прогрес, персонаж і магазин</strong>
+        </div>
+        <div class="about-metric">
+          <span class="about-metric__label" id="aboutMetricThreeLabel">Безпека</span>
+          <strong class="about-metric__value" id="aboutMetricThreeValue">Захищені з’єднання та сервісні обмеження доступу</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="about-grid">
+      <article class="about-card about-card--spotlight">
+        <div data-lang-block="uk">
+          <h2>Що це за застосунок</h2>
+          <p>
+            Life Capital Academy створений як навчальний застосунок, у якому профіль, мініігри,
+            персонаж, магазин і прогрес працюють в єдиному інтерфейсі. Клієнтська частина
+            застосунку використовує спільну фронтенд-основу з сайтом, щоб користувач отримував
+            однакову логіку, навігацію та ключові сценарії на різних платформах.
+          </p>
+        </div>
+        <div data-lang-block="en" hidden>
+          <h2>What this app is</h2>
+          <p>
+            Life Capital Academy is designed as a learning app where the profile, mini-games,
+            character, shop, and progress work inside one interface. The client side uses the same
+            frontend foundation as the website so users get consistent navigation, logic, and core
+            flows across platforms.
+          </p>
+        </div>
+      </article>
+
+      <article class="about-card">
+        <div data-lang-block="uk">
+          <h2>Що можна робити</h2>
+          <ul>
+            <li>Створювати акаунт, обирати власний тег, налаштовувати профіль і параметри застосунку.</li>
+            <li>Проходити навчальні сценарії у форматі мініігор і відстежувати свій прогрес.</li>
+            <li>Працювати з персонажем, магазином, інвентарем і локальними нагородами.</li>
+            <li>Використовувати спільний інтерфейс застосунку та сайту без окремого перенавчання навігації.</li>
+          </ul>
+        </div>
+        <div data-lang-block="en" hidden>
+          <h2>What users can do</h2>
+          <ul>
+            <li>Create an account, choose a personal tag, and adjust the profile and app settings.</li>
+            <li>Go through learning scenarios in a mini-game format and track personal progress.</li>
+            <li>Use the character page, shop, inventory, and local reward mechanics.</li>
+            <li>Move through an interface shared by the app and website without relearning navigation.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="about-card">
+        <div data-lang-block="uk">
+          <h2>Фронтенд-основа</h2>
+          <p>
+            Застосунок базується на фронтенд-компонентах сайту: ті самі екрани, сценарії,
+            структура профілю та навчальних блоків можуть використовуватися як у вебсередовищі,
+            так і в оболонці застосунку. Це спрощує підтримку функцій і пришвидшує оновлення.
+          </p>
+        </div>
+        <div data-lang-block="en" hidden>
+          <h2>Frontend foundation</h2>
+          <p>
+            The app is built on frontend components shared with the website: the same screens,
+            profile structure, and learning flows can be reused both in the browser and inside the
+            app shell. That makes support easier and speeds up product updates.
+          </p>
+        </div>
+      </article>
+
+      <article class="about-card">
+        <div data-lang-block="uk">
+          <h2>Безпека сервісу</h2>
+          <p>
+            Для взаємодії із сервісними компонентами та підключеними провайдерами застосунок
+            використовує захищені з’єднання. Доступ до інтеграцій, службових середовищ і змін у
+            даних обмежується технічними правилами, а критичні сценарії авторизації покладаються на
+            перевірені механізми провайдерів входу.
+          </p>
+        </div>
+        <div data-lang-block="en" hidden>
+          <h2>Service security</h2>
+          <p>
+            The app uses protected connections when it interacts with service components and
+            connected providers. Access to integrations, service environments, and data-changing
+            actions is limited by technical rules, while critical authentication flows rely on the
+            provider’s verified sign-in mechanisms.
+          </p>
+        </div>
+      </article>
+
+      <article class="about-card">
+        <div data-lang-block="uk">
+          <h2>Акаунт, дані й синхронізація</h2>
+          <p>
+            Залежно від функції, дані можуть зберігатися локально на пристрої або передаватися
+            через захищені сервісні канали для роботи окремих компонентів. Конкретний режим
+            зберігання залежить від версії функції, підключеного способу входу та технічної
+            реалізації відповідного сценарію.
+          </p>
+        </div>
+        <div data-lang-block="en" hidden>
+          <h2>Account, data, and sync</h2>
+          <p>
+            Depending on the feature, data may stay on the device or move through protected service
+            channels to support specific components. The exact storage mode depends on the feature
+            version, the connected sign-in method, and the technical implementation of that flow.
+          </p>
+        </div>
+      </article>
+
+      <article class="about-card about-card--wide about-card--cta">
+        <div data-lang-block="uk">
+          <h2>Конфіденційність і правила використання</h2>
+          <p>
+            Якщо вам потрібні деталі про обробку даних, захист інфраструктури, відповідальність
+            користувача та правила використання застосунку, відкрийте сторінки політики
+            конфіденційності та умов надання послуг.
+          </p>
+          <div class="about-card__actions">
+            <a class="about-link" href="privacy.html">Відкрити privacy policy</a>
+          </div>
+        </div>
+        <div data-lang-block="en" hidden>
+          <h2>Privacy and usage rules</h2>
+          <p>
+            If you need details about data handling, infrastructure protection, user responsibility,
+            and the rules for using the app, open the privacy policy and terms pages.
+          </p>
+          <div class="about-card__actions">
+            <a class="about-link" href="privacy.html">Open privacy policy</a>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script src="js/about.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
+  <script src="js/app-enhancements.js"></script>
+</body>
+</html>

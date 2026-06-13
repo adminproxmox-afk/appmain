@@ -1,0 +1,17 @@
+{
+  "name": "Life Capital Academy",
+  "short_name": "LCA",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0d1b2a",
+  "theme_color": "#0d1b2a",
+  "description": "Life Capital Academy — mobile-first gamified learning academy with mini-games, progress, streaks and leaderboard.",
+  "icons": [
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
