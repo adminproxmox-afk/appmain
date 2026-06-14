@@ -1310,6 +1310,54 @@ function buildNodeEl(node, issueMap) {
   return wrap;
 }
 
+function getHostViewportState() {
+  if (window.parent && window.parent !== window && lastHostViewport && typeof lastHostViewport.frameTop === 'number') {
+    return lastHostViewport;
+  }
+  return null;
+}
+
+function requestHostScroll(delta) {
+  if (!delta || typeof delta !== 'number' || !window.parent || window.parent === window) return false;
+  postHostMessage('scroll-request', { delta });
+  return true;
+}
+
+function ensureDropRootVisible() {
+  const root = document.getElementById('drop-root');
+  if (!root) return;
+
+  const rect = root.getBoundingClientRect();
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+  const bottomThreshold = 110;
+  const topThreshold = 60;
+
+  const hostViewport = getHostViewportState();
+  if (hostViewport) {
+    const hostViewportHeight = hostViewport.viewportHeight || window.parent.innerHeight || window.parent.document.documentElement.clientHeight;
+    const absoluteTop = hostViewport.frameTop + rect.top;
+    const absoluteBottom = hostViewport.frameTop + rect.bottom;
+
+    if (absoluteBottom > hostViewportHeight - bottomThreshold) {
+      const delta = Math.ceil((absoluteBottom - (hostViewportHeight - bottomThreshold)) * 0.7);
+      requestHostScroll(delta);
+      return;
+    }
+
+    if (absoluteTop < topThreshold) {
+      const delta = -Math.ceil((topThreshold - absoluteTop) * 0.7);
+      requestHostScroll(delta);
+      return;
+    }
+  }
+
+  if (rect.bottom > viewportHeight - bottomThreshold) {
+    root.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  } else if (rect.top < topThreshold) {
+    root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
 function renderCanvas() {
   const root = document.getElementById('drop-root');
   const issueMap = getStructureIssues();
@@ -1324,6 +1372,7 @@ function renderCanvas() {
   setupDropZone(root, 'root');
   updateStatus();
   updatePanel();
+  ensureDropRootVisible();
   scheduleHostResize();
 }
 
@@ -1497,6 +1546,47 @@ function onTouchStart(event) {
   document.addEventListener('touchcancel', onTouchEnd);
 }
 
+function autoScrollWhileTouchDragging(clientY) {
+  const hostViewport = getHostViewportState();
+  if (hostViewport) {
+    const hostViewportHeight = hostViewport.viewportHeight || window.parent.innerHeight || window.parent.document.documentElement.clientHeight;
+    const absoluteY = hostViewport.frameTop + clientY;
+    const threshold = 90;
+
+    if (absoluteY > hostViewportHeight - threshold) {
+      const delta = Math.ceil((absoluteY - (hostViewportHeight - threshold)) * 0.45);
+      if (delta > 0) requestHostScroll(delta);
+      return;
+    }
+
+    if (absoluteY < threshold) {
+      const delta = -Math.ceil((threshold - absoluteY) * 0.45);
+      if (delta < 0) requestHostScroll(delta);
+      return;
+    }
+  }
+
+  const scrollRoot = document.scrollingElement || document.documentElement;
+  if (!scrollRoot) return;
+
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+  const threshold = 90;
+  const distanceFromTop = clientY;
+  const distanceFromBottom = viewportHeight - clientY;
+  const maxScroll = scrollRoot.scrollHeight - viewportHeight;
+
+  if (distanceFromBottom < threshold && scrollRoot.scrollTop < maxScroll) {
+    const delta = Math.min(maxScroll - scrollRoot.scrollTop, Math.round((threshold - distanceFromBottom) * 0.35));
+    if (delta > 0) window.scrollBy({ top: delta, behavior: 'auto' });
+    return;
+  }
+
+  if (distanceFromTop < threshold && scrollRoot.scrollTop > 0) {
+    const delta = Math.min(scrollRoot.scrollTop, Math.round((threshold - distanceFromTop) * 0.35));
+    if (delta > 0) window.scrollBy({ top: -delta, behavior: 'auto' });
+  }
+}
+
 function onTouchMove(event) {
   if (!touchStartInfo) return;
   const touch = event.touches[0];
@@ -1516,6 +1606,7 @@ function onTouchMove(event) {
 
   if (!S.dragSrc) return;
 
+  autoScrollWhileTouchDragging(touch.clientY);
   event.preventDefault();
   ghost.style.left = `${touch.clientX + 12}px`;
   ghost.style.top = `${touch.clientY + 12}px`;

@@ -483,10 +483,14 @@
 
     const glow = extra === 'transparent' ? 'transparent' : `${extra}55`;
     const shadow = extra === 'transparent' ? 'transparent' : `${extra}aa`;
-    elements.avatarAuraLeft.style.background = glow;
-    elements.avatarAuraRight.style.background = glow;
-    elements.avatarAuraLeft.style.boxShadow = `0 0 14px ${shadow}`;
-    elements.avatarAuraRight.style.boxShadow = `0 0 14px ${shadow}`;
+    if (elements.avatarAuraLeft) {
+      elements.avatarAuraLeft.style.background = glow;
+      elements.avatarAuraLeft.style.boxShadow = `0 0 14px ${shadow}`;
+    }
+    if (elements.avatarAuraRight) {
+      elements.avatarAuraRight.style.background = glow;
+      elements.avatarAuraRight.style.boxShadow = `0 0 14px ${shadow}`;
+    }
 
     const profile = window.AppDB?.getData?.()?.profile || {};
     const gender = normalizeGender(profile.gender);

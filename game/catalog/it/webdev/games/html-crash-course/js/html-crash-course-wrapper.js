@@ -347,6 +347,14 @@
       return;
     }
 
+    if (data.type === 'scroll-request') {
+      const delta = Number(data.payload?.delta) || 0;
+      if (delta) {
+        window.scrollBy({ top: delta, behavior: 'auto' });
+      }
+      return;
+    }
+
     if (data.type === 'content-size') {
       frameContentHeight = Math.max(0, Number(data.payload?.height) || 0);
       syncFrameHeight();
